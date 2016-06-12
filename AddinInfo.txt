@@ -1,0 +1,12 @@
+//------------------------------------------------------------------
+// Addin-Application header control file, created with the CASIO SDK
+//------------------------------------------------------------------
+[OUTPUT]     : "SPEED.G1A"
+[BINDATA]    : "FXADDINror.bin"
+[DISPNAME]   : "Speed"
+[APPNAME]    : "@SPEED"
+[VERSION]    : "01.00.0000"
+[APL_ICON]   : "MainIcon.bmp"
+[MODULE_NUM] : 0
+[MOD1_TITLE] : "Speed"
+[MOD1_ICON]  : "eActivityIcon.bmp"

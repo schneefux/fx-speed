@@ -1,0 +1,273 @@
+Hitachi Optimizing Linkage Editor (Ver. 7.1.03.000)18-Oct-2012 16:26:35
+
+*** Options ***
+
+-subcommand=C:\Users\Timo\AppData\Local\Temp\hmkFE3D.tmp
+noprelink
+sdebug
+rom D=R
+nomessage
+list "G:\Casio SDK\Projekte\Speed\Debug\FXADDINror.map"
+show symbol
+nooptimize
+start P_TOP,P,C,D,C$VTBL,C$INIT/0300200,B_BR_Size,B,R/08100000
+fsymbol P
+nologo
+input "G:\Casio SDK\Projekte\Speed\Debug\Speed.obj" "G:\Casio SDK\Projekte\Speed\Debug\change_freq.obj" "G:\Casio SDK\Projekte\Speed\Debug\change_iclk.obj" "G:\Casio SDK\Projekte\Speed\Debug\change_pclk.obj" "G:\Casio SDK\Projekte\Speed\Debug\change_bclk.obj" "G:\Casio SDK\Projekte\Speed\Debug\change_sclk.obj"
+input "G:\Casio SDK\OS\FX\lib\setup.obj"
+library "G:\Casio SDK\OS\FX\lib\fx9860G_library.lib"
+library "G:\Casio SDK\OS\FX\lib\revolution.lib"
+output "G:\Casio SDK\Projekte\Speed\Debug\FXADDINror.abs"
+-nomessage=1100
+end
+
+*** Error information ***
+
+*** Mapping List ***
+
+SECTION                            START      END         SIZE   ALIGN
+
+P_TOP
+                                  00300200  0030020b         c   4
+P
+                                  0030020c  00300cef       ae4   4
+C
+                                  00300cf0  00300f4b       25c   4
+D
+                                  00300f4c  00300f5b        10   4
+B_BR_Size
+                                  08100000  08100003         4   4
+B
+                                  08100004  08100007         4   4
+R
+                                  08100008  08100017        10   4
+
+*** Symbol List ***
+
+SECTION=
+FILE=                               START        END    SIZE
+  SYMBOL                            ADDR        SIZE    INFO      COUNTS  OPT
+
+SECTION=P_TOP
+FILE=G:\Casio SDK\Projekte\Speed\Debug\Speed.obj
+                                  00300200  0030020b         c
+  _InitializeSystem
+                                  00300200         c   func ,g         * 
+
+SECTION=P
+FILE=G:\Casio SDK\Projekte\Speed\Debug\Speed.obj
+                                  0030020c  003007fb       5f0
+  _printXY
+                                  0030020c        20   func ,g         * 
+  _update
+                                  0030022c       484   func ,g         * 
+  _AddIn_main
+                                  003006b0       14c   func ,g         * 
+FILE=G:\Casio SDK\Projekte\Speed\Debug\change_freq.obj
+                                  003007fc  00300827        2c
+  _change_freq
+                                  003007fc         0   none ,g         * 
+FILE=G:\Casio SDK\Projekte\Speed\Debug\change_iclk.obj
+                                  00300828  00300853        2c
+  _change_iclk
+                                  00300828         0   none ,g         * 
+FILE=G:\Casio SDK\Projekte\Speed\Debug\change_pclk.obj
+                                  00300854  0030087f        2c
+  _change_pclk
+                                  00300854         0   none ,g         * 
+FILE=G:\Casio SDK\Projekte\Speed\Debug\change_bclk.obj
+                                  00300880  003008ab        2c
+  _change_bclk
+                                  00300880         0   none ,g         * 
+FILE=G:\Casio SDK\Projekte\Speed\Debug\change_sclk.obj
+                                  003008ac  003008d7        2c
+  _change_sclk
+                                  003008ac         0   none ,g         * 
+FILE=G:\Casio SDK\OS\FX\lib\setup.obj
+                                  003008d8  003009f3       11c
+  ___LINK_PROTECT
+                                  003008d8         4   func ,g         * 
+  _SetQuitHandler
+                                  003008dc         6   func ,g         * 
+  _OnAppCloseDefault
+                                  003008e2        54   func ,g         * 
+  __INITSCT_ADDIN
+                                  00300936        48   func ,g         * 
+  _INIT_ADDIN_APPLICATION
+                                  0030097e        76   func ,g         * 
+FILE=_Bdel_cychdr
+                                  003009f4  00300a03        10
+  _Bdel_cychdr
+                                  003009f4         0   none ,g         * 
+FILE=_Bdisp_AllClr_VRAM
+                                  00300a04  00300a13        10
+  _Bdisp_AllClr_VRAM
+                                  00300a04         0   none ,g         * 
+FILE=_Bdisp_PutDisp_DD
+                                  00300a14  00300a23        10
+  _Bdisp_PutDisp_DD
+                                  00300a14         0   none ,g         * 
+FILE=_BfileFLS_CloseFile
+                                  00300a24  00300a33        10
+  _BfileFLS_CloseFile
+                                  00300a24         0   none ,g         * 
+FILE=_Bkey_Set_RepeatTime_Default
+                                  00300a34  00300a43        10
+  _Bkey_Set_RepeatTime_Default
+                                  00300a34         0   none ,g         * 
+FILE=_CallbackAtQuitMainFunction
+                                  00300a44  00300a53        10
+  _CallbackAtQuitMainFunction
+                                  00300a44         0   none ,g         * 
+FILE=_flsFindClose
+                                  00300a54  00300a63        10
+  _flsFindClose
+                                  00300a54         0   none ,g         * 
+FILE=_getkey
+                                  00300a64  00300a73        10
+  _GetKey
+                                  00300a64         0   none ,g         * 
+FILE=_GLibAddinAplExecutionCheck
+                                  00300a74  00300a83        10
+  _GLibAddinAplExecutionCheck
+                                  00300a74         0   none ,g         * 
+FILE=_Hmem_SetMMU
+                                  00300a84  00300a93        10
+  _Hmem_SetMMU
+                                  00300a84         0   none ,g         * 
+FILE=dispbios
+                                  00300a94  00300c09       176
+  _PrintMini
+                                  00300a94        1c   func ,g         * 
+  _locate
+                                  00300ab0        28   func ,g         * 
+  _Bdisp_ReadArea_DD
+                                  00300ad8       132   func ,g         * 
+FILE=__divls
+                                  00300c0c  00300cbf        b4
+  __divls
+                                  00300c0c         0   none ,g         * 
+  divls_zero
+                                  00300caa         0   none ,l         * 
+  A_errno
+                                  00300cb8         0   none ,l         * 
+  n_zerono
+                                  00300cbc         0   none ,l         * 
+FILE=_DD_GET
+                                  00300cc0  00300ccf        10
+  _DD_GET
+                                  00300cc0         0   none ,g         * 
+FILE=_locate
+                                  00300cd0  00300cdf        10
+  _locate_OS
+                                  00300cd0         0   none ,g         * 
+FILE=_PrintMiniSd
+                                  00300ce0  00300cef        10
+  _PrintMiniSd
+                                  00300ce0         0   none ,g         * 
+
+SECTION=C
+FILE=G:\Casio SDK\Projekte\Speed\Debug\Speed.obj
+                                  00300cf0  00300f37       248
+  _PLLs
+                                  00300cf0        38   data ,g         * 
+  _DIVs
+                                  00300d28        30   data ,g         * 
+FILE=addin_sct
+                                  00300f38  00300f4b        14
+  _B_BGN
+                                  00300f38         0   none ,g         * 
+  _B_END
+                                  00300f3c         0   none ,g         * 
+  _R_BGN
+                                  00300f40         0   none ,g         * 
+  _R_END
+                                  00300f44         0   none ,g         * 
+  _D_ROM
+                                  00300f48         0   none ,g         * 
+
+SECTION=B_BR_Size
+FILE=G:\Casio SDK\Projekte\Speed\Debug\Speed.obj
+                                  08100000  08100003         4
+  _BR_Size
+                                  08100000         4   data ,g         * 
+
+SECTION=B
+FILE=_errno
+                                  08100004  08100007         4
+  __errno
+                                  08100004         4   data ,g         * 
+
+SECTION=R
+FILE=G:\Casio SDK\Projekte\Speed\Debug\Speed.obj
+                                  08100008  08100013         c
+  _key
+                                  08100008         4   data ,g         * 
+  _cur
+                                  0810000c         4   data ,g         * 
+  _FRQCR
+                                  08100010         4   data ,g         * 
+FILE=G:\Casio SDK\OS\FX\lib\setup.obj
+                                  08100014  08100017         4
+  _gb_OnAppClose
+                                  08100014         4   data ,g         * 
+
+Absolute value symbols
+FILE=_Bdel_cychdr
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+FILE=_Bdisp_AllClr_VRAM
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+FILE=_Bdisp_PutDisp_DD
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+FILE=_BfileFLS_CloseFile
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+FILE=_Bkey_Set_RepeatTime_Default
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+FILE=_CallbackAtQuitMainFunction
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+FILE=_flsFindClose
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+FILE=_getkey
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+FILE=_GLibAddinAplExecutionCheck
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+FILE=_Hmem_SetMMU
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+FILE=__divls
+  zerodiv
+                                  0000044e         0   none ,l         * 
+FILE=_DD_GET
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+FILE=_locate
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+FILE=_PrintMiniSd
+  __JumpTableTOP
+                                  80010070         0   none ,l         * 
+
+*** Delete Symbols ***
+
+SYMBOL                                SIZE    INFO
+
+*** Variable Accessible with Abs8 ***
+
+SYMBOL                                SIZE    COUNTS  OPTIMIZE
+
+*** Variable Accessible with Abs16 ***
+
+SYMBOL                                SIZE    COUNTS  OPTIMIZE
+
+*** Function Call ***
+
+SYMBOL                              COUNTS  OPTIMIZE

@@ -1,0 +1,23 @@
+  .export _overclock
+   .SECTION P,CODE,ALIGN=4
+
+_change_freq:
+	mov r4, r0
+	and #0x3F, r0
+	shll8 r0
+	mov.l frqcr, r1
+	mov.l pll_mask, r3
+	mov.l @r1, r2
+	and r3, r2
+	or r0, r2
+	mov.l r2, @r1
+	mov.l frqcr_kick_bit, r0
+	mov.l @r1, r2
+	or r0, r2
+	rts
+	mov.l r2, @r1
+	.align 4
+	frqcr_kick_bit: .long 0x80000000
+	pll_mask: .long 0xC0FFFFFF
+	frqcr: .long 0xA4150000
+	.END

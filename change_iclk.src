@@ -1,0 +1,22 @@
+	.export _change_iclk
+	.SECTION P,CODE,ALIGN=4
+
+_change_iclk:
+	mov r4, r0
+	and #h'0F, r0
+	shll16 r0
+	shll2 r0
+	shll2 r0
+	mov.l #h'A4150000, r1
+	mov.l #h'FF0FFFFF, r3
+	mov.l @r1, r2
+	and r3, r2
+	or r0, r2
+	mov.l r2, @r1
+	mov.l #h'80000000, r0
+	mov.l @r1, r2
+	or r0, r2
+	rts
+	mov.l r2, @r1
+	.align 4
+	.END

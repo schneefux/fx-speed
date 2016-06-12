@@ -1,0 +1,1721 @@
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE    1
+
+************ OBJECT LISTING ************
+
+FILE NAME: G:\Casio SDK\Projekte\Speed\Speed.c
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+         Speed.c     1    #include "fxlib.h"
+         Speed.c     2    
+         Speed.c     3    #define PLL_28x /*0011011*/ 27 // 101.5 MHz
+         Speed.c     4    #define PLL_26x /*0011001*/ 25 // 94.3 MHz 
+         Speed.c     5    #define PLL_24x /*0010111*/ 23 // 87 MHz 
+         Speed.c     6    #define PLL_20x /*0010011*/ 19 // 72.5 MHz 
+         Speed.c     7    #define PLL_18x /*0010001*/ 17 // 65.25 MHz 
+         Speed.c     8    #define PLL_16x /*0001111*/ 15 // 58 MHz (NORMAL SPEED) 
+         Speed.c     9    #define PLL_15x /*0001110*/ 14 // 54.37 MHz 
+         Speed.c    10    #define PLL_12x /*0001011*/ 11 // 43.5 MHz 
+         Speed.c    11    #define PLL_8x  /*0000111*/ 7 // 29 MHz 
+         Speed.c    12    #define PLL_6x  /*0000101*/ 5 // 21.75 MHz 
+         Speed.c    13    #define PLL_4x  /*0000011*/ 3 // 14.5 MHz 
+         Speed.c    14    #define PLL_3x  /*0000010*/ 2 // 10.8 MHz 
+         Speed.c    15    #define PLL_2x  /*0000001*/ 1 // 7.25 MHz 
+         Speed.c    16    #define PLL_1x  /*0000000*/ 0 // 3.6 MHz
+         Speed.c    17    
+         Speed.c    18    #define ICLK_2 /*00000*/ 0
+         Speed.c    19    #define ICLK_3 /*00001*/ 1
+         Speed.c    20    #define ICLK_4 /*00010*/ 2
+         Speed.c    21    #define ICLK_6 /*00011*/ 3
+         Speed.c    22    #define ICLK_8 /*00100*/ 4
+         Speed.c    23    #define ICLK_12 /*00101*/ 5
+         Speed.c    24    #define ICLK_16 /*00110*/ 6
+         Speed.c    25    #define ICLK_24 /*00111*/ 7
+         Speed.c    26    #define ICLK_32 /*01000*/ 8
+         Speed.c    27    #define ICLK_36 /*01001*/ 9
+         Speed.c    28    #define ICLK_48 /*01010*/ 10
+         Speed.c    29    #define ICLK_72 /*01011*/ 11
+         Speed.c    30    
+         Speed.c    31    const int PLLs[] = {PLL_1x, PLL_2x, PLL_3x, PLL_4x, PLL_6x, PLL_8x, PLL_12x, PLL_15x, PLL_16x, PLL_18x, PL
+                         +L_20x, PLL_24x, PLL_26x, PLL_28x};
+         Speed.c    32    const int DIVs[] = {ICLK_2, ICLK_3, ICLK_4, ICLK_6, ICLK_8, ICLK_12, ICLK_16, ICLK_24, ICLK_32, ICLK_36, I
+                         +CLK_48, ICLK_72};
+         Speed.c    33    
+         Speed.c    34    int key = 0;
+         Speed.c    35    char*cur = 0x00000000;
+         Speed.c    36    volatile unsigned int*FRQCR = (unsigned int*) 0xA4150000;
+         Speed.c    37    
+         Speed.c    38    void printXY(int x, int y, char *text, int useless)
+P   00000000              _printXY:                        ; function: printXY
+                                                           ; frame size=8
+    00000000 7FF8                   ADD         #-8,R15
+         Speed.c    39    {
+         Speed.c    40            PrintMini(x * 6,y * 6, text, MINI_OVER);
+    00000002 E710                   MOV         #16,R7
+    00000004 2F42                   MOV.L       R4,@R15
+    00000006 6353                   MOV         R5,R3
+    00000008 1F51                   MOV.L       R5,@(4,R15)
+    0000000A 4308                   SHLL2       R3
+    0000000C 64F2                   MOV.L       @R15,R4
+    0000000E 4500                   SHLL        R5
+    00000010 353C                   ADD         R3,R5
+    00000012 6343                   MOV         R4,R3
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE    2
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    00000014 4400                   SHLL        R4
+    00000016 4308                   SHLL2       R3
+    00000018 343C                   ADD         R3,R4
+    0000001A D341                   MOV.L       L560,R3    ; _PrintMini
+    0000001C 432B                   JMP         @R3
+    0000001E 7F08                   ADD         #8,R15
+         Speed.c    41    }
+         Speed.c    42    
+         Speed.c    43    void update(void) {
+    00000020              _update:                         ; function: update
+                                                           ; frame size=32
+    00000020 2FE6                   MOV.L       R14,@-R15
+    00000022 2FD6                   MOV.L       R13,@-R15
+    00000024 2FC6                   MOV.L       R12,@-R15
+    00000026 2FB6                   MOV.L       R11,@-R15
+    00000028 2FA6                   MOV.L       R10,@-R15
+    0000002A 2F96                   MOV.L       R9,@-R15
+    0000002C 2F86                   MOV.L       R8,@-R15
+    0000002E 4F22                   STS.L       PR,@-R15
+         Speed.c    44            int warning = 0;
+         Speed.c    45            Bdisp_AllClr_VRAM();
+    00000030 D33C                   MOV.L       L560+4,R3  ; _Bdisp_AllClr_VRAM
+    00000032 430B                   JSR         @R3
+    00000034 ED00                   MOV         #0,R13
+         Speed.c    46            printXY(2, 1, "  Operating Frequency", MINI_OVER);
+    00000036 E710                   MOV         #16,R7
+    00000038 D63B                   MOV.L       L560+8,R6  ; L311
+    0000003A E501                   MOV         #1,R5
+    0000003C BFE0                   BSR         _printXY
+    0000003E E402                   MOV         #2,R4
+         Speed.c    47            printXY(3, 2, "  Freq:", MINI_OVER);
+    00000040 D63A                   MOV.L       L560+12,R6 ; L312
+    00000042 E502                   MOV         #2,R5
+    00000044 E710                   MOV         #16,R7
+    00000046 BFDB                   BSR         _printXY
+    00000048 E403                   MOV         #3,R4
+         Speed.c    48            printXY(3, 3, "  ICLK:", MINI_OVER);
+    0000004A E710                   MOV         #16,R7
+    0000004C D638                   MOV.L       L560+16,R6 ; L313
+    0000004E E503                   MOV         #3,R5
+    00000050 BFD6                   BSR         _printXY
+    00000052 6453                   MOV         R5,R4
+         Speed.c    49            printXY(3, 4, "  PCLK:", MINI_OVER);
+    00000054 D637                   MOV.L       L560+20,R6 ; L314
+    00000056 E504                   MOV         #4,R5
+    00000058 E710                   MOV         #16,R7
+    0000005A BFD1                   BSR         _printXY
+    0000005C E403                   MOV         #3,R4
+         Speed.c    50            printXY(3, 5, "  BCLK:", MINI_OVER);
+    0000005E E710                   MOV         #16,R7
+    00000060 D635                   MOV.L       L560+24,R6 ; L315
+    00000062 E505                   MOV         #5,R5
+    00000064 BFCC                   BSR         _printXY
+    00000066 E403                   MOV         #3,R4
+         Speed.c    51            printXY(3, 6, "  SCLK:", MINI_OVER);
+    00000068 D634                   MOV.L       L560+28,R6 ; L316
+    0000006A E506                   MOV         #6,R5
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE    3
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    0000006C E710                   MOV         #16,R7
+    0000006E BFC7                   BSR         _printXY
+    00000070 E403                   MOV         #3,R4
+         Speed.c    52            printXY(1, 7, "  U/D - FRQ, L/R - ICLK", MINI_OVER);
+    00000072 E710                   MOV         #16,R7
+    00000074 D632                   MOV.L       L560+32,R6 ; L317
+    00000076 E507                   MOV         #7,R5
+    00000078 BFC2                   BSR         _printXY
+    0000007A E401                   MOV         #1,R4
+         Speed.c    53            switch((*FRQCR & 0x3F000000) >> 24) {
+    0000007C DB31                   MOV.L       L560+36,R11; L333
+    0000007E DC32                   MOV.L       L560+40,R12; _FRQCR
+    00000080 DE32                   MOV.L       L560+44,R14; _cur
+    00000082 60C2                   MOV.L       @R12,R0
+    00000084 D332                   MOV.L       L560+48,R3 ; H'3F000000
+    00000086 6002                   MOV.L       @R0,R0
+    00000088 2039                   AND         R3,R0
+    0000008A 4029                   SHLR16      R0
+    0000008C 4019                   SHLR8       R0
+    0000008E 881B                   CMP/EQ      #27,R0
+    00000090 891B                   BT          L387
+    00000092 8819                   CMP/EQ      #25,R0
+    00000094 891D                   BT          L389
+    00000096 8817                   CMP/EQ      #23,R0
+    00000098 891E                   BT          L391
+    0000009A 8813                   CMP/EQ      #19,R0
+    0000009C 891F                   BT          L393
+    0000009E 8811                   CMP/EQ      #17,R0
+    000000A0 8920                   BT          L395
+    000000A2 880F                   CMP/EQ      #15,R0
+    000000A4 8921                   BT          L397
+    000000A6 880E                   CMP/EQ      #14,R0
+    000000A8 8922                   BT          L399
+    000000AA 880B                   CMP/EQ      #11,R0
+    000000AC 8923                   BT          L401
+    000000AE 8807                   CMP/EQ      #7,R0
+    000000B0 8924                   BT          L403
+    000000B2 8805                   CMP/EQ      #5,R0
+    000000B4 8925                   BT          L405
+    000000B6 8803                   CMP/EQ      #3,R0
+    000000B8 8926                   BT          L407
+    000000BA 8802                   CMP/EQ      #2,R0
+    000000BC 8927                   BT          L409
+    000000BE 8801                   CMP/EQ      #1,R0
+    000000C0 8928                   BT          L411
+    000000C2 8800                   CMP/EQ      #0,R0
+    000000C4 8929                   BT          L413
+    000000C6 A061                   BRA         L415
+    000000C8 0009                   NOP
+    000000CA              L387:                            ; case label 
+         Speed.c    54                    case PLL_28x:
+         Speed.c    55                            cur = "  101.5 MHz !!!";
+    000000CA D122                   MOV.L       L560+52,R1 ; L319
+    000000CC 2E12                   MOV.L       R1,@R14
+         Speed.c    56                            warning = 1;
+         Speed.c    57                            break;
+    000000CE A05E                   BRA         L492
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE    4
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    000000D0 ED01                   MOV         #1,R13
+    000000D2              L389:                            ; case label 
+         Speed.c    58                    case PLL_26x:
+         Speed.c    59                            cur = "  94.3 MHz";
+    000000D2 D121                   MOV.L       L560+56,R1 ; L320
+         Speed.c    60                            break;
+    000000D4 A022                   BRA         L532
+    000000D6 0009                   NOP
+    000000D8              L391:                            ; case label 
+         Speed.c    61                    case PLL_24x:
+         Speed.c    62                            cur = "  87 MHz";
+    000000D8 D020                   MOV.L       L560+60,R0 ; L321
+         Speed.c    63                            break;
+    000000DA A01C                   BRA         L531
+    000000DC 0009                   NOP
+    000000DE              L393:                            ; case label 
+         Speed.c    64                    case PLL_20x:
+         Speed.c    65                            cur = "  72.5 MHz";
+    000000DE D120                   MOV.L       L560+64,R1 ; L322
+         Speed.c    66                            break;
+    000000E0 A01C                   BRA         L532
+    000000E2 0009                   NOP
+    000000E4              L395:                            ; case label 
+         Speed.c    67                    case PLL_18x:
+         Speed.c    68                            cur = "  65.3 MHz";
+    000000E4 D01F                   MOV.L       L560+68,R0 ; L323
+         Speed.c    69                            break;
+    000000E6 A016                   BRA         L531
+    000000E8 0009                   NOP
+    000000EA              L397:                            ; case label 
+         Speed.c    70                    case PLL_16x:
+         Speed.c    71                            cur = "  58 MHz (NORM)";
+    000000EA D11F                   MOV.L       L560+72,R1 ; L324
+         Speed.c    72                            break;
+    000000EC A016                   BRA         L532
+    000000EE 0009                   NOP
+    000000F0              L399:                            ; case label 
+         Speed.c    73                    case PLL_15x:
+         Speed.c    74                            cur = "  54.4 MHz";
+    000000F0 D01E                   MOV.L       L560+76,R0 ; L325
+         Speed.c    75                            break;
+    000000F2 A010                   BRA         L531
+    000000F4 0009                   NOP
+    000000F6              L401:                            ; case label 
+         Speed.c    76                    case PLL_12x:
+         Speed.c    77                            cur = "  43.5 MHz";
+    000000F6 D11E                   MOV.L       L560+80,R1 ; L326
+         Speed.c    78                            break;
+    000000F8 A010                   BRA         L532
+    000000FA 0009                   NOP
+    000000FC              L403:                            ; case label 
+         Speed.c    79                    case PLL_8x:
+         Speed.c    80                            cur = "  29 MHz";
+    000000FC D01D                   MOV.L       L560+84,R0 ; L327
+         Speed.c    81                            break;
+    000000FE A00A                   BRA         L531
+    00000100 0009                   NOP
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE    5
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    00000102              L405:                            ; case label 
+         Speed.c    82                    case PLL_6x:
+         Speed.c    83                            cur = "  21.7 MHz";
+    00000102 D11D                   MOV.L       L560+88,R1 ; L328
+         Speed.c    84                            break;
+    00000104 A00A                   BRA         L532
+    00000106 0009                   NOP
+    00000108              L407:                            ; case label 
+         Speed.c    85                    case PLL_4x:
+         Speed.c    86                            cur = "  14.5 MHz";
+    00000108 D01C                   MOV.L       L560+92,R0 ; L329
+         Speed.c    87                            break;
+    0000010A A004                   BRA         L531
+    0000010C 0009                   NOP
+    0000010E              L409:                            ; case label 
+         Speed.c    88                    case PLL_3x:
+         Speed.c    89                            cur = "  10.8 MHz";
+    0000010E D11C                   MOV.L       L560+96,R1 ; L330
+         Speed.c    90                            break;
+    00000110 A004                   BRA         L532
+    00000112 0009                   NOP
+    00000114              L411:                            ; case label 
+         Speed.c    91                    case PLL_2x:
+         Speed.c    92                            cur = "  7.25 MHz";
+    00000114 D01B                   MOV.L       L560+100,R0; L331
+         Speed.c    93                            break;
+    00000116              L531:                             
+    00000116 A03A                   BRA         L492
+    00000118 2E02                   MOV.L       R0,@R14
+    0000011A              L413:                            ; case label 
+         Speed.c    94                    case PLL_1x:
+         Speed.c    95                            cur = "  3.6 MHz";
+    0000011A D11B                   MOV.L       L560+104,R1; L332
+         Speed.c    96                            break;
+    0000011C              L532:                             
+    0000011C A037                   BRA         L492
+    0000011E 2E12                   MOV.L       R1,@R14
+    00000120              L560:                             
+    00000120 <00000000>             .DATA.L     _PrintMini
+    00000124 <00000000>             .DATA.L     _Bdisp_AllClr_VRAM
+    00000128 <00000000>             .DATA.L     L311
+    0000012C <00000000>             .DATA.L     L312
+    00000130 <00000000>             .DATA.L     L313
+    00000134 <00000000>             .DATA.L     L314
+    00000138 <00000000>             .DATA.L     L315
+    0000013C <00000000>             .DATA.L     L316
+    00000140 <00000000>             .DATA.L     L317
+    00000144 <00000000>             .DATA.L     L333
+    00000148 <00000000>             .DATA.L     _FRQCR
+    0000014C <00000000>             .DATA.L     _cur
+    00000150 3F000000               .DATA.L     H'3F000000
+    00000154 <00000000>             .DATA.L     L319
+    00000158 <00000000>             .DATA.L     L320
+    0000015C <00000000>             .DATA.L     L321
+    00000160 <00000000>             .DATA.L     L322
+    00000164 <00000000>             .DATA.L     L323
+    00000168 <00000000>             .DATA.L     L324
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE    6
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    0000016C <00000000>             .DATA.L     L325
+    00000170 <00000000>             .DATA.L     L326
+    00000174 <00000000>             .DATA.L     L327
+    00000178 <00000000>             .DATA.L     L328
+    0000017C <00000000>             .DATA.L     L329
+    00000180 <00000000>             .DATA.L     L330
+    00000184 <00000000>             .DATA.L     L331
+    00000188 <00000000>             .DATA.L     L332
+    0000018C              L415:                            ; default label 
+         Speed.c    97                    default:
+         Speed.c    98                            cur = "  INVALID";
+    0000018C 2EB2                   MOV.L       R11,@R14
+         Speed.c    99                            break;
+    0000018E              L492:                             
+         Speed.c   100            }
+         Speed.c   101            printXY(9, 2, cur, MINI_OVER);
+    0000018E E710                   MOV         #16,R7
+    00000190 66E2                   MOV.L       @R14,R6
+    00000192 E502                   MOV         #2,R5
+    00000194 BF34                   BSR         _printXY
+    00000196 E409                   MOV         #9,R4
+         Speed.c   102            switch((*FRQCR & 0x00F00000) >> 20) {
+    00000198 D809                   MOV.L       L561+2,R8  ; L337
+    0000019A D90A                   MOV.L       L561+6,R9  ; L336
+    0000019C DA0A                   MOV.L       L561+10,R10; L335
+    0000019E 60C2                   MOV.L       @R12,R0
+    000001A0 D30A                   MOV.L       L561+14,R3 ; H'00F00000
+    000001A2 6002                   MOV.L       @R0,R0
+    000001A4 2039                   AND         R3,R0
+    000001A6 4029                   SHLR16      R0
+    000001A8 4009                   SHLR2       R0
+    000001AA 4009                   SHLR2       R0
+    000001AC E10C                   MOV         #12,R1
+    000001AE 3012                   CMP/HS      R1,R0
+    000001B0 894E                   BT          L441
+    000001B2 4000                   SHLL        R0
+    000001B4 6103                   MOV         R0,R1
+    000001B6 C706                   MOVA        L563,R0
+    000001B8 001D                   MOV.W       @(R0,R1),R0
+    000001BA 0023                   BRAF        R0
+    000001BC 0009                   NOP
+    000001BE              L562:                             
+    000001BE              L561:                             
+    000001BE 0000                   .DATA.W     0
+    000001C0 <00000000>             .DATA.L     L337
+    000001C4 <00000000>             .DATA.L     L336
+    000001C8 <00000000>             .DATA.L     L335
+    000001CC 00F00000               .DATA.L     H'00F00000
+    000001D0              L563:
+    000001D0 0066                   .DATA.W     L439-L562
+    000001D2 0060                   .DATA.W     L437-L562
+    000001D4 005A                   .DATA.W     L435-L562
+    000001D6 0054                   .DATA.W     L433-L562
+    000001D8 004E                   .DATA.W     L431-L562
+    000001DA 0048                   .DATA.W     L429-L562
+    000001DC 0042                   .DATA.W     L427-L562
+    000001DE 003C                   .DATA.W     L425-L562
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE    7
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    000001E0 0036                   .DATA.W     L423-L562
+    000001E2 0032                   .DATA.W     L421-L562
+    000001E4 002E                   .DATA.W     L419-L562
+    000001E6 002A                   .DATA.W     L417-L562
+         Speed.c   103                    case ICLK_72:
+    000001E8              L417:                            ; case label 
+         Speed.c   104                            cur = "  1/72";
+         Speed.c   105                            break;
+    000001E8 A033                   BRA         L493
+    000001EA 2EA2                   MOV.L       R10,@R14
+    000001EC              L419:                            ; case label 
+         Speed.c   106                    case ICLK_48:
+         Speed.c   107                            cur = "  1/48";
+         Speed.c   108                            break;
+    000001EC A031                   BRA         L493
+    000001EE 2E92                   MOV.L       R9,@R14
+    000001F0              L421:                            ; case label 
+         Speed.c   109                    case ICLK_36:
+         Speed.c   110                            cur = "  1/36";
+         Speed.c   111                            break;
+    000001F0 A02F                   BRA         L493
+    000001F2 2E82                   MOV.L       R8,@R14
+    000001F4              L423:                            ; case label 
+         Speed.c   112                    case ICLK_32:
+         Speed.c   113                            cur = "  1/32";
+    000001F4 D20D                   MOV.L       L564,R2    ; L338
+         Speed.c   114                            break;
+    000001F6 A02C                   BRA         L493
+    000001F8 2E22                   MOV.L       R2,@R14
+    000001FA              L425:                            ; case label 
+         Speed.c   115                    case ICLK_24:
+         Speed.c   116                            cur = "  1/24";
+    000001FA D00D                   MOV.L       L564+4,R0  ; L339
+         Speed.c   117                            break;
+    000001FC A010                   BRA         L537
+    000001FE 0009                   NOP
+    00000200              L427:                            ; case label 
+         Speed.c   118                    case ICLK_16:
+         Speed.c   119                            cur = "  1/16";
+    00000200 D10C                   MOV.L       L564+8,R1  ; L340
+         Speed.c   120                            break;
+    00000202 A00A                   BRA         L536
+    00000204 0009                   NOP
+    00000206              L429:                            ; case label 
+         Speed.c   121                    case ICLK_12:
+         Speed.c   122                            cur = "  1/12";
+    00000206 D00C                   MOV.L       L564+12,R0 ; L341
+         Speed.c   123                            break;
+    00000208 A00A                   BRA         L537
+    0000020A 0009                   NOP
+    0000020C              L431:                            ; case label 
+         Speed.c   124                    case ICLK_8:
+         Speed.c   125                            cur = "  1/8";
+    0000020C D10B                   MOV.L       L564+16,R1 ; L342
+         Speed.c   126                            break;
+    0000020E A004                   BRA         L536
+    00000210 0009                   NOP
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE    8
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    00000212              L433:                            ; case label 
+         Speed.c   127                    case ICLK_6:
+         Speed.c   128                            cur = "  1/6";
+    00000212 D00B                   MOV.L       L564+20,R0 ; L343
+         Speed.c   129                            break;
+    00000214 A004                   BRA         L537
+    00000216 0009                   NOP
+    00000218              L435:                            ; case label 
+         Speed.c   130                    case ICLK_4:
+         Speed.c   131                            cur = "  1/4";
+    00000218 D10A                   MOV.L       L564+24,R1 ; L344
+         Speed.c   132                            break;
+    0000021A              L536:                             
+    0000021A A01A                   BRA         L493
+    0000021C 2E12                   MOV.L       R1,@R14
+    0000021E              L437:                            ; case label 
+         Speed.c   133                    case ICLK_3:
+         Speed.c   134                            cur = "  1/3 (NORM)";
+    0000021E D00A                   MOV.L       L564+28,R0 ; L345
+         Speed.c   135                            break;
+    00000220              L537:                             
+    00000220 A017                   BRA         L493
+    00000222 2E02                   MOV.L       R0,@R14
+    00000224              L439:                            ; case label 
+         Speed.c   136                    case ICLK_2:
+         Speed.c   137                            cur = "  1/2 !!!";
+    00000224 D109                   MOV.L       L564+32,R1 ; L346
+    00000226 2E12                   MOV.L       R1,@R14
+         Speed.c   138                            warning += 2;
+         Speed.c   139                            break;
+    00000228 A013                   BRA         L493
+    0000022A 7D02                   ADD         #2,R13
+    0000022C              L564:                             
+    0000022C <00000000>             .DATA.L     L338
+    00000230 <00000000>             .DATA.L     L339
+    00000234 <00000000>             .DATA.L     L340
+    00000238 <00000000>             .DATA.L     L341
+    0000023C <00000000>             .DATA.L     L342
+    00000240 <00000000>             .DATA.L     L343
+    00000244 <00000000>             .DATA.L     L344
+    00000248 <00000000>             .DATA.L     L345
+    0000024C <00000000>             .DATA.L     L346
+    00000250              L441:                            ; default label 
+         Speed.c   140                    default:
+         Speed.c   141                            cur = "  INVALID";
+    00000250 2EB2                   MOV.L       R11,@R14
+         Speed.c   142                            break;
+    00000252              L493:                             
+         Speed.c   143            }
+         Speed.c   144            printXY(9, 3, cur, MINI_OVER);
+    00000252 E710                   MOV         #16,R7
+    00000254 66E2                   MOV.L       @R14,R6
+    00000256 E503                   MOV         #3,R5
+    00000258 BED2                   BSR         _printXY
+    0000025A E409                   MOV         #9,R4
+         Speed.c   145            switch(*FRQCR & 0xF) {
+    0000025C 60C2                   MOV.L       @R12,R0
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE    9
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    0000025E 6002                   MOV.L       @R0,R0
+    00000260 C90F                   AND         #15,R0
+    00000262 E10C                   MOV         #12,R1
+    00000264 3012                   CMP/HS      R1,R0
+    00000266 8945                   BT          L457
+    00000268 4000                   SHLL        R0
+    0000026A 6103                   MOV         R0,R1
+    0000026C C701                   MOVA        L566,R0
+    0000026E 001D                   MOV.W       @(R0,R1),R0
+    00000270 0023                   BRAF        R0
+    00000272 0009                   NOP
+    00000274              L565:                             
+    00000274              L566:
+    00000274 0054                   .DATA.W     L455-L565
+    00000276 004E                   .DATA.W     L453-L565
+    00000278 0048                   .DATA.W     L452-L565
+    0000027A 0042                   .DATA.W     L450-L565
+    0000027C 003C                   .DATA.W     L449-L565
+    0000027E 0036                   .DATA.W     L448-L565
+    00000280 0030                   .DATA.W     L447-L565
+    00000282 002A                   .DATA.W     L446-L565
+    00000284 0024                   .DATA.W     L445-L565
+    00000286 0020                   .DATA.W     L444-L565
+    00000288 001C                   .DATA.W     L443-L565
+    0000028A 0018                   .DATA.W     L442-L565
+         Speed.c   146                    case ICLK_72:
+    0000028C              L442:                            ; case label 
+         Speed.c   147                            cur = "  1/72";
+         Speed.c   148                            break;
+    0000028C A033                   BRA         L494
+    0000028E 2EA2                   MOV.L       R10,@R14
+    00000290              L443:                            ; case label 
+         Speed.c   149                    case ICLK_48:
+         Speed.c   150                                    cur = "  1/48";
+         Speed.c   151                    break;
+    00000290 A031                   BRA         L494
+    00000292 2E92                   MOV.L       R9,@R14
+    00000294              L444:                            ; case label 
+         Speed.c   152                    case ICLK_36:
+         Speed.c   153                            cur = "  1/36";
+         Speed.c   154                            break;
+    00000294 A02F                   BRA         L494
+    00000296 2E82                   MOV.L       R8,@R14
+    00000298              L445:                            ; case label 
+         Speed.c   155                            case ICLK_32:
+         Speed.c   156                    cur = "  1/32";
+    00000298 D20D                   MOV.L       L567+2,R2  ; L338
+         Speed.c   157                                    break;
+    0000029A A016                   BRA         L544
+    0000029C 0009                   NOP
+    0000029E              L446:                            ; case label 
+         Speed.c   158                    case ICLK_24:
+         Speed.c   159                            cur = "  1/24";
+    0000029E D10D                   MOV.L       L567+6,R1  ; L339
+         Speed.c   160                    break;
+    000002A0 A010                   BRA         L543
+    000002A2 0009                   NOP
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   10
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    000002A4              L447:                            ; case label 
+         Speed.c   161                            case ICLK_16:
+         Speed.c   162                    cur = "  1/16";
+    000002A4 D20C                   MOV.L       L567+10,R2 ; L340
+         Speed.c   163                            break;
+    000002A6 A010                   BRA         L544
+    000002A8 0009                   NOP
+    000002AA              L448:                            ; case label 
+         Speed.c   164                    case ICLK_12:
+         Speed.c   165                                    cur = "  1/12";
+    000002AA D10C                   MOV.L       L567+14,R1 ; L341
+         Speed.c   166                    break;
+    000002AC A00A                   BRA         L543
+    000002AE 0009                   NOP
+    000002B0              L449:                            ; case label 
+         Speed.c   167                    case ICLK_8:
+         Speed.c   168                            cur = "  1/8";
+    000002B0 D20B                   MOV.L       L567+18,R2 ; L342
+         Speed.c   169                                    break;
+    000002B2 A00A                   BRA         L544
+    000002B4 0009                   NOP
+    000002B6              L450:                            ; case label 
+         Speed.c   170                    case ICLK_6:
+         Speed.c   171                            cur = "  1/6 (NORM)";
+    000002B6 D10B                   MOV.L       L567+22,R1 ; L348
+         Speed.c   172                            break;
+    000002B8 A004                   BRA         L543
+    000002BA 0009                   NOP
+    000002BC              L452:                            ; case label 
+         Speed.c   173                    case ICLK_4:
+         Speed.c   174                            cur = "  1/4";
+    000002BC D20A                   MOV.L       L567+26,R2 ; L344
+         Speed.c   175                            break;
+    000002BE A004                   BRA         L544
+    000002C0 0009                   NOP
+    000002C2              L453:                            ; case label 
+         Speed.c   176                    case ICLK_3:
+         Speed.c   177                            cur = "  1/3";
+    000002C2 D10A                   MOV.L       L567+30,R1 ; L349
+         Speed.c   178                            break;
+    000002C4              L543:                             
+    000002C4 A017                   BRA         L494
+    000002C6 2E12                   MOV.L       R1,@R14
+    000002C8              L455:                            ; case label 
+         Speed.c   179                    case ICLK_2:
+         Speed.c   180                            cur = "  1/2";
+    000002C8 D209                   MOV.L       L567+34,R2 ; L350
+         Speed.c   181                            break;
+    000002CA              L544:                             
+    000002CA A014                   BRA         L494
+    000002CC 2E22                   MOV.L       R2,@R14
+    000002CE              L567:                             
+    000002CE 0000                   .DATA.W     0
+    000002D0 <00000000>             .DATA.L     L338
+    000002D4 <00000000>             .DATA.L     L339
+    000002D8 <00000000>             .DATA.L     L340
+    000002DC <00000000>             .DATA.L     L341
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   11
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    000002E0 <00000000>             .DATA.L     L342
+    000002E4 <00000000>             .DATA.L     L348
+    000002E8 <00000000>             .DATA.L     L344
+    000002EC <00000000>             .DATA.L     L349
+    000002F0 <00000000>             .DATA.L     L350
+    000002F4              L457:                            ; default label 
+         Speed.c   182                    default:
+         Speed.c   183                            cur = "  INVALID";
+    000002F4 2EB2                   MOV.L       R11,@R14
+         Speed.c   184                            break;
+    000002F6              L494:                             
+         Speed.c   185            }
+         Speed.c   186            printXY(9, 4, cur, MINI_OVER);
+    000002F6 E710                   MOV         #16,R7
+    000002F8 66E2                   MOV.L       @R14,R6
+    000002FA E504                   MOV         #4,R5
+    000002FC BE80                   BSR         _printXY
+    000002FE E409                   MOV         #9,R4
+         Speed.c   187            switch((*FRQCR & 0xF00) >> 8) {
+    00000300 60C2                   MOV.L       @R12,R0
+    00000302 930B                   MOV.W       L568,R3    ; H'0F00
+    00000304 6002                   MOV.L       @R0,R0
+    00000306 2039                   AND         R3,R0
+    00000308 4019                   SHLR8       R0
+    0000030A E10C                   MOV         #12,R1
+    0000030C 3012                   CMP/HS      R1,R0
+    0000030E 8947                   BT          L471
+    00000310 4000                   SHLL        R0
+    00000312 6103                   MOV         R0,R1
+    00000314 C702                   MOVA        L570,R0
+    00000316 001D                   MOV.W       @(R0,R1),R0
+    00000318 0023                   BRAF        R0
+    0000031A 0009                   NOP
+    0000031C              L569:                             
+    0000031C              L568:                             
+    0000031C 0F00                   .DATA.W     H'0F00
+    0000031E 00000000               .DATA.W     0
+    00000320              L570:
+    00000320 0058                   .DATA.W     L470-L569
+    00000322 0052                   .DATA.W     L469-L569
+    00000324 004C                   .DATA.W     L467-L569
+    00000326 0046                   .DATA.W     L466-L569
+    00000328 0040                   .DATA.W     L465-L569
+    0000032A 003A                   .DATA.W     L464-L569
+    0000032C 0034                   .DATA.W     L463-L569
+    0000032E 002E                   .DATA.W     L462-L569
+    00000330 0028                   .DATA.W     L461-L569
+    00000332 0024                   .DATA.W     L460-L569
+    00000334 0020                   .DATA.W     L459-L569
+    00000336 001C                   .DATA.W     L458-L569
+         Speed.c   188                    case ICLK_72:
+    00000338              L458:                            ; case label 
+         Speed.c   189                            cur = "  1/72";
+         Speed.c   190                            break;
+    00000338 A033                   BRA         L495
+    0000033A 2EA2                   MOV.L       R10,@R14
+    0000033C              L459:                            ; case label 
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   12
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+         Speed.c   191                    case ICLK_48:
+         Speed.c   192                            cur = "  1/48";
+         Speed.c   193                            break;
+    0000033C A031                   BRA         L495
+    0000033E 2E92                   MOV.L       R9,@R14
+    00000340              L460:                            ; case label 
+         Speed.c   194                    case ICLK_36:
+         Speed.c   195                            cur = "  1/36";
+         Speed.c   196                            break;
+    00000340 A02F                   BRA         L495
+    00000342 2E82                   MOV.L       R8,@R14
+    00000344              L461:                            ; case label 
+         Speed.c   197                    case ICLK_32:
+         Speed.c   198                            cur = "  1/32";
+    00000344 D20D                   MOV.L       L571+2,R2  ; L338
+         Speed.c   199                            break;
+    00000346 A02C                   BRA         L495
+    00000348 2E22                   MOV.L       R2,@R14
+    0000034A              L462:                            ; case label 
+         Speed.c   200                    case ICLK_24:
+         Speed.c   201                            cur = "  1/24";
+    0000034A D00D                   MOV.L       L571+6,R0  ; L339
+         Speed.c   202                            break;
+    0000034C A010                   BRA         L549
+    0000034E 0009                   NOP
+    00000350              L463:                            ; case label 
+         Speed.c   203                    case ICLK_16:
+         Speed.c   204                            cur = "  1/16";
+    00000350 D10C                   MOV.L       L571+10,R1 ; L340
+         Speed.c   205                            break;
+    00000352 A010                   BRA         L550
+    00000354 0009                   NOP
+    00000356              L464:                            ; case label 
+         Speed.c   206                    case ICLK_12:
+         Speed.c   207                            cur = "  1/12";
+    00000356 D00C                   MOV.L       L571+14,R0 ; L341
+         Speed.c   208                            break;
+    00000358 A00A                   BRA         L549
+    0000035A 0009                   NOP
+    0000035C              L465:                            ; case label 
+         Speed.c   209                    case ICLK_8:
+         Speed.c   210                            cur = "  1/8";
+    0000035C D10B                   MOV.L       L571+18,R1 ; L342
+         Speed.c   211                            break;
+    0000035E A00A                   BRA         L550
+    00000360 0009                   NOP
+    00000362              L466:                            ; case label 
+         Speed.c   212                    case ICLK_6:
+         Speed.c   213                            cur = "  1/6";
+    00000362 D00B                   MOV.L       L571+22,R0 ; L343
+         Speed.c   214                            break;
+    00000364 A004                   BRA         L549
+    00000366 0009                   NOP
+    00000368              L467:                            ; case label 
+         Speed.c   215                    case ICLK_4:
+         Speed.c   216                            cur = "  1/4 (NORM)";
+    00000368 D10A                   MOV.L       L571+26,R1 ; L352
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   13
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+         Speed.c   217                            break;
+    0000036A A004                   BRA         L550
+    0000036C 0009                   NOP
+    0000036E              L469:                            ; case label 
+         Speed.c   218                    case ICLK_3:
+         Speed.c   219                            cur = "  1/3";
+    0000036E D00A                   MOV.L       L571+30,R0 ; L349
+         Speed.c   220                            break;
+    00000370              L549:                             
+    00000370 A017                   BRA         L495
+    00000372 2E02                   MOV.L       R0,@R14
+    00000374              L470:                            ; case label 
+         Speed.c   221                    case ICLK_2:
+         Speed.c   222                            cur = "  1/2";
+    00000374 D109                   MOV.L       L571+34,R1 ; L350
+         Speed.c   223                            break;
+    00000376              L550:                             
+    00000376 A014                   BRA         L495
+    00000378 2E12                   MOV.L       R1,@R14
+    0000037A              L571:                             
+    0000037A 0000                   .DATA.W     0
+    0000037C <00000000>             .DATA.L     L338
+    00000380 <00000000>             .DATA.L     L339
+    00000384 <00000000>             .DATA.L     L340
+    00000388 <00000000>             .DATA.L     L341
+    0000038C <00000000>             .DATA.L     L342
+    00000390 <00000000>             .DATA.L     L343
+    00000394 <00000000>             .DATA.L     L352
+    00000398 <00000000>             .DATA.L     L349
+    0000039C <00000000>             .DATA.L     L350
+    000003A0              L471:                            ; default label 
+         Speed.c   224                    default:
+         Speed.c   225                            cur = "  INVALID";
+    000003A0 2EB2                   MOV.L       R11,@R14
+         Speed.c   226                            break;
+    000003A2              L495:                             
+         Speed.c   227            }
+         Speed.c   228            printXY(9, 5, cur, MINI_OVER);
+    000003A2 E710                   MOV         #16,R7
+    000003A4 66E2                   MOV.L       @R14,R6
+    000003A6 E505                   MOV         #5,R5
+    000003A8 BE2A                   BSR         _printXY
+    000003AA E409                   MOV         #9,R4
+         Speed.c   229            switch((*FRQCR & 0xF000) >> 12) {
+    000003AC 60C2                   MOV.L       @R12,R0
+    000003AE D307                   MOV.L       L572,R3    ; H'0000F000
+    000003B0 6002                   MOV.L       @R0,R0
+    000003B2 2039                   AND         R3,R0
+    000003B4 4019                   SHLR8       R0
+    000003B6 4009                   SHLR2       R0
+    000003B8 4009                   SHLR2       R0
+    000003BA E10C                   MOV         #12,R1
+    000003BC 3012                   CMP/HS      R1,R0
+    000003BE 8934                   BT          L484
+    000003C0 4000                   SHLL        R0
+    000003C2 6103                   MOV         R0,R1
+    000003C4 C702                   MOVA        L574,R0
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   14
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    000003C6 001D                   MOV.W       @(R0,R1),R0
+    000003C8 0023                   BRAF        R0
+    000003CA 0009                   NOP
+    000003CC              L573:                             
+    000003CC              L572:                             
+    000003CC 0000F000               .DATA.L     H'0000F000
+    000003D0              L574:
+    000003D0 0058                   .DATA.W     L483-L573
+    000003D2 0052                   .DATA.W     L482-L573
+    000003D4 004C                   .DATA.W     L481-L573
+    000003D6 0046                   .DATA.W     L480-L573
+    000003D8 0040                   .DATA.W     L479-L573
+    000003DA 003A                   .DATA.W     L478-L573
+    000003DC 0034                   .DATA.W     L477-L573
+    000003DE 002E                   .DATA.W     L476-L573
+    000003E0 0028                   .DATA.W     L475-L573
+    000003E2 0024                   .DATA.W     L474-L573
+    000003E4 0020                   .DATA.W     L473-L573
+    000003E6 001C                   .DATA.W     L472-L573
+         Speed.c   230                    case ICLK_72:
+    000003E8              L472:                            ; case label 
+         Speed.c   231                            cur = "  1/72";
+         Speed.c   232                            break;
+    000003E8 A020                   BRA         L496
+    000003EA 2EA2                   MOV.L       R10,@R14
+    000003EC              L473:                            ; case label 
+         Speed.c   233                    case ICLK_48:
+         Speed.c   234                            cur = "  1/48";
+         Speed.c   235                            break;
+    000003EC A01E                   BRA         L496
+    000003EE 2E92                   MOV.L       R9,@R14
+    000003F0              L474:                            ; case label 
+         Speed.c   236                    case ICLK_36:
+         Speed.c   237                            cur = "  1/36";
+         Speed.c   238                            break;
+    000003F0 A01C                   BRA         L496
+    000003F2 2E82                   MOV.L       R8,@R14
+    000003F4              L475:                            ; case label 
+         Speed.c   239                    case ICLK_32:
+         Speed.c   240                            cur = "  1/32";
+    000003F4 D21F                   MOV.L       L575+2,R2  ; L338
+         Speed.c   241                            break;
+    000003F6 A019                   BRA         L496
+    000003F8 2E22                   MOV.L       R2,@R14
+    000003FA              L476:                            ; case label 
+         Speed.c   242                    case ICLK_24:
+         Speed.c   243                            cur = "  1/24";
+    000003FA D01F                   MOV.L       L575+6,R0  ; L339
+         Speed.c   244                            break;
+    000003FC A010                   BRA         L555
+    000003FE 0009                   NOP
+    00000400              L477:                            ; case label 
+         Speed.c   245                    case ICLK_16:
+         Speed.c   246                            cur = "  1/16";
+    00000400 D11E                   MOV.L       L575+10,R1 ; L340
+         Speed.c   247                            break;
+    00000402 A010                   BRA         L556
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   15
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    00000404 0009                   NOP
+    00000406              L478:                            ; case label 
+         Speed.c   248                    case ICLK_12:
+         Speed.c   249                            cur = "  1/12";
+    00000406 D01E                   MOV.L       L575+14,R0 ; L341
+         Speed.c   250                            break;
+    00000408 A00A                   BRA         L555
+    0000040A 0009                   NOP
+    0000040C              L479:                            ; case label 
+         Speed.c   251                    case ICLK_8:
+         Speed.c   252                            cur = "  1/8";
+    0000040C D11D                   MOV.L       L575+18,R1 ; L342
+         Speed.c   253                            break;
+    0000040E A00A                   BRA         L556
+    00000410 0009                   NOP
+    00000412              L480:                            ; case label 
+         Speed.c   254                    case ICLK_6:
+         Speed.c   255                            cur = "  1/6";
+    00000412 D01D                   MOV.L       L575+22,R0 ; L343
+         Speed.c   256                            break;
+    00000414 A004                   BRA         L555
+    00000416 0009                   NOP
+    00000418              L481:                            ; case label 
+         Speed.c   257                    case ICLK_4:
+         Speed.c   258                            cur = "  1/4 (NORM)";
+    00000418 D11C                   MOV.L       L575+26,R1 ; L352
+         Speed.c   259                            break;
+    0000041A A004                   BRA         L556
+    0000041C 0009                   NOP
+    0000041E              L482:                            ; case label 
+         Speed.c   260                    case ICLK_3:
+         Speed.c   261                            cur = "  1/3";
+    0000041E D01C                   MOV.L       L575+30,R0 ; L349
+         Speed.c   262                            break;
+    00000420              L555:                             
+    00000420 A004                   BRA         L496
+    00000422 2E02                   MOV.L       R0,@R14
+    00000424              L483:                            ; case label 
+         Speed.c   263                    case ICLK_2:
+         Speed.c   264                            cur = "  1/2";
+    00000424 D11B                   MOV.L       L575+34,R1 ; L350
+         Speed.c   265                            break;
+    00000426              L556:                             
+    00000426 A001                   BRA         L496
+    00000428 2E12                   MOV.L       R1,@R14
+    0000042A              L484:                            ; default label 
+         Speed.c   266                    default:
+         Speed.c   267                            cur = "  INVALID";
+    0000042A 2EB2                   MOV.L       R11,@R14
+         Speed.c   268                    break;
+    0000042C              L496:                             
+         Speed.c   269                    }
+         Speed.c   270            printXY(9, 6, cur, MINI_OVER);
+    0000042C 66E2                   MOV.L       @R14,R6
+    0000042E E506                   MOV         #6,R5
+    00000430 E710                   MOV         #16,R7
+    00000432 BDE5                   BSR         _printXY
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   16
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    00000434 E409                   MOV         #9,R4
+         Speed.c   271            if(warning == 1 || warning == 3) {
+    00000436 60D3                   MOV         R13,R0
+    00000438 8801                   CMP/EQ      #1,R0
+    0000043A 8902                   BT          L498
+    0000043C 60D3                   MOV         R13,R0
+    0000043E 8803                   CMP/EQ      #3,R0
+    00000440 8B06                   BF          L497
+    00000442              L498:                             
+         Speed.c   272                    printXY(1, 8, "  UNSAFE FREQ/DIV VALUE", MINI_OVER);
+    00000442 E710                   MOV         #16,R7
+    00000444 D614                   MOV.L       L575+38,R6 ; L355
+    00000446 E508                   MOV         #8,R5
+    00000448 BDDA                   BSR         _printXY
+    0000044A E401                   MOV         #1,R4
+    0000044C A007                   BRA         L499
+    0000044E 0009                   NOP
+    00000450              L497:                             
+         Speed.c   273                    } else if(warning == 2) {
+    00000450 8802                   CMP/EQ      #2,R0
+    00000452 8B04                   BF          L499
+         Speed.c   274                    printXY(1, 8, "  TROUBLESOME DIV VALUE", MINI_OVER);
+    00000454 D611                   MOV.L       L575+42,R6 ; L357
+    00000456 E508                   MOV         #8,R5
+    00000458 E710                   MOV         #16,R7
+    0000045A BDD1                   BSR         _printXY
+    0000045C E401                   MOV         #1,R4
+    0000045E              L499:                             
+         Speed.c   275            }
+         Speed.c   276            Bdisp_PutDisp_DD();
+    0000045E 4F26                   LDS.L       @R15+,PR
+    00000460 D20F                   MOV.L       L575+46,R2 ; _Bdisp_PutDisp_DD
+    00000462 68F6                   MOV.L       @R15+,R8
+    00000464 69F6                   MOV.L       @R15+,R9
+    00000466 6AF6                   MOV.L       @R15+,R10
+    00000468 6BF6                   MOV.L       @R15+,R11
+    0000046A 6CF6                   MOV.L       @R15+,R12
+    0000046C 6DF6                   MOV.L       @R15+,R13
+    0000046E 422B                   JMP         @R2
+    00000470 6EF6                   MOV.L       @R15+,R14
+    00000472              L575:                             
+    00000472 0000                   .DATA.W     0
+    00000474 <00000000>             .DATA.L     L338
+    00000478 <00000000>             .DATA.L     L339
+    0000047C <00000000>             .DATA.L     L340
+    00000480 <00000000>             .DATA.L     L341
+    00000484 <00000000>             .DATA.L     L342
+    00000488 <00000000>             .DATA.L     L343
+    0000048C <00000000>             .DATA.L     L352
+    00000490 <00000000>             .DATA.L     L349
+    00000494 <00000000>             .DATA.L     L350
+    00000498 <00000000>             .DATA.L     L355
+    0000049C <00000000>             .DATA.L     L357
+    000004A0 <00000000>             .DATA.L     _Bdisp_PutDisp_DD
+         Speed.c   277    }
+         Speed.c   278    
+         Speed.c   279    int AddIn_main(int isAppli, unsigned short OptionNum)
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   17
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    000004A4              _AddIn_main:                     ; function: AddIn_main
+                                                           ; frame size=24
+    000004A4 D438                   MOV.L       L576+10,R4 ; _DIVs
+    000004A6 7FE8                   ADD         #-24,R15
+    000004A8 D538                   MOV.L       L576+14,R5 ; _PLLs
+    000004AA 6343                   MOV         R4,R3
+    000004AC DA38                   MOV.L       L576+18,R10; _change_freq
+    000004AE 6943                   MOV         R4,R9
+    000004B0 DB38                   MOV.L       L576+22,R11; _change_iclk
+    000004B2 6853                   MOV         R5,R8
+    000004B4 DC38                   MOV.L       L576+26,R12; H'3F000000
+    000004B6 6253                   MOV         R5,R2
+    000004B8 DD38                   MOV.L       L576+30,R13; H'00F00000
+    000004BA 6153                   MOV         R5,R1
+    000004BC 730C                   ADD         #12,R3
+    000004BE 7908                   ADD         #8,R9
+    000004C0 1F33                   MOV.L       R3,@(12,R15)
+    000004C2 7838                   ADD         #56,R8
+    000004C4 7234                   ADD         #52,R2
+    000004C6 7504                   ADD         #4,R5
+    000004C8 1F22                   MOV.L       R2,@(8,R15)
+    000004CA 6343                   MOV         R4,R3
+    000004CC 1F11                   MOV.L       R1,@(4,R15)
+    000004CE 7404                   ADD         #4,R4
+    000004D0 1F55                   MOV.L       R5,@(20,R15)
+    000004D2 2F32                   MOV.L       R3,@R15
+    000004D4 1F44                   MOV.L       R4,@(16,R15)
+         Speed.c   280    {
+         Speed.c   281            int i;  
+         Speed.c   282            while(1) {
+    000004D6              L502:                             
+         Speed.c   283                    update();
+    000004D6 BDA3                   BSR         _update
+    000004D8 0009                   NOP
+    000004DA D231                   MOV.L       L576+34,R2 ; _FRQCR
+    000004DC D331                   MOV.L       L576+38,R3 ; _key
+    000004DE 6032                   MOV.L       @R3,R0
+    000004E0 914D                   MOV.W       L576,R1    ; H'7542
+    000004E2 3010                   CMP/EQ      R1,R0
+    000004E4 8D0B                   BT/S        L487
+    000004E6 6522                   MOV.L       @R2,R5
+    000004E8 914A                   MOV.W       L576+2,R1  ; H'7547
+    000004EA 3010                   CMP/EQ      R1,R0
+    000004EC 891B                   BT          L488
+    000004EE 9148                   MOV.W       L576+4,R1  ; H'7544
+    000004F0 3010                   CMP/EQ      R1,R0
+    000004F2 892D                   BT          L489
+    000004F4 9146                   MOV.W       L576+6,R1  ; H'7545
+    000004F6 3010                   CMP/EQ      R1,R0
+    000004F8 8956                   BT          L490
+    000004FA A06D                   BRA         L503
+    000004FC 0009                   NOP
+    000004FE              L487:                            ; case label 
+    000004FE 5EF1                   MOV.L       @(4,R15),R14
+    00000500 54F1                   MOV.L       @(4,R15),R4
+         Speed.c   284                    switch (key) {
+         Speed.c   285                            case KEY_CTRL_UP:
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   18
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+         Speed.c   286                                    for(i = 0; i < 13; i++) {
+    00000502 51F2                   MOV.L       @(8,R15),R1
+    00000504 3412                   CMP/HS      R1,R4
+    00000506 8D67                   BT/S        L503
+    00000508 7E04                   ADD         #4,R14
+    0000050A              L505:                             
+         Speed.c   287                                            if(((*FRQCR & 0x3F000000) >> 24) == PLLs[i]) {
+    0000050A 6352                   MOV.L       @R5,R3
+    0000050C 23C9                   AND         R12,R3
+    0000050E 4329                   SHLR16      R3
+    00000510 6142                   MOV.L       @R4,R1
+    00000512 4319                   SHLR8       R3
+    00000514 3310                   CMP/EQ      R1,R3
+    00000516 8911                   BT          L557
+    00000518 52F2                   MOV.L       @(8,R15),R2
+    0000051A 7404                   ADD         #4,R4
+    0000051C 3422                   CMP/HS      R2,R4
+    0000051E 8FF4                   BF/S        L505
+    00000520 7E04                   ADD         #4,R14
+         Speed.c   288                                                    change_freq(PLLs[i+1]);
+         Speed.c   289                                                    update();
+         Speed.c   290                                                    break;
+         Speed.c   291                                            }
+         Speed.c   292                                    }
+         Speed.c   293                                    break;
+    00000522 A059                   BRA         L503
+    00000524 0009                   NOP
+    00000526              L488:                            ; case label 
+    00000526 5EF1                   MOV.L       @(4,R15),R14
+    00000528 54F5                   MOV.L       @(20,R15),R4
+         Speed.c   294                            case KEY_CTRL_DOWN:
+         Speed.c   295                                    for(i = 1; i < 14; i++) {
+    0000052A 3482                   CMP/HS      R8,R4
+    0000052C 8954                   BT          L503
+    0000052E              L509:                             
+         Speed.c   296                                            if(((*FRQCR & 0x3F000000) >> 24) == PLLs[i]) {
+    0000052E 6352                   MOV.L       @R5,R3
+    00000530 23C9                   AND         R12,R3
+    00000532 4329                   SHLR16      R3
+    00000534 6142                   MOV.L       @R4,R1
+    00000536 4319                   SHLR8       R3
+    00000538 3310                   CMP/EQ      R1,R3
+    0000053A 8B03                   BF          L510
+    0000053C              L557:                             
+         Speed.c   297                                                    change_freq(PLLs[i-1]);
+    0000053C 4A0B                   JSR         @R10
+    0000053E 64E2                   MOV.L       @R14,R4
+         Speed.c   298                                                    update();
+         Speed.c   299                                                    break;
+    00000540 A041                   BRA         L559
+    00000542 0009                   NOP
+    00000544              L510:                             
+    00000544 7404                   ADD         #4,R4
+    00000546 3482                   CMP/HS      R8,R4
+    00000548 8FF1                   BF/S        L509
+    0000054A 7E04                   ADD         #4,R14
+         Speed.c   300                                            }
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   19
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+         Speed.c   301                                    }
+         Speed.c   302                                    break;
+    0000054C A044                   BRA         L503
+    0000054E 0009                   NOP
+    00000550              L489:                            ; case label 
+    00000550 6EF2                   MOV.L       @R15,R14
+    00000552 64F2                   MOV.L       @R15,R4
+         Speed.c   303                            case KEY_CTRL_LEFT:
+         Speed.c   304                                    for(i = 0; i < 2; i++) {
+    00000554 3492                   CMP/HS      R9,R4
+    00000556 8D3F                   BT/S        L503
+    00000558 7E04                   ADD         #4,R14
+    0000055A              L513:                             
+         Speed.c   305                                            if(((*FRQCR & 0x00F00000) >> 20) == DIVs[i]) {
+    0000055A 6352                   MOV.L       @R5,R3
+    0000055C 23D9                   AND         R13,R3
+    0000055E 4329                   SHLR16      R3
+    00000560 6142                   MOV.L       @R4,R1
+    00000562 4309                   SHLR2       R3
+    00000564 4309                   SHLR2       R3
+    00000566 3310                   CMP/EQ      R1,R3
+    00000568 8B03                   BF          L514
+         Speed.c   306                                                    change_iclk(DIVs[i+1]);
+    0000056A 4B0B                   JSR         @R11
+    0000056C 64E2                   MOV.L       @R14,R4
+         Speed.c   307                                                    update();
+         Speed.c   308                                                    break;
+    0000056E A02A                   BRA         L559
+    00000570 0009                   NOP
+    00000572              L514:                             
+    00000572 7404                   ADD         #4,R4
+    00000574 3492                   CMP/HS      R9,R4
+    00000576 8FF0                   BF/S        L513
+    00000578 7E04                   ADD         #4,R14
+         Speed.c   309                                            }
+         Speed.c   310                                    }
+         Speed.c   311                                    break;
+    0000057A A02D                   BRA         L503
+    0000057C 0009                   NOP
+    0000057E              L576:                             
+    0000057E 7542                   .DATA.W     H'7542
+    00000580 7547                   .DATA.W     H'7547
+    00000582 7544                   .DATA.W     H'7544
+    00000584 7545                   .DATA.W     H'7545
+    00000586 0000                   .DATA.W     0
+    00000588 <00000000>             .DATA.L     _DIVs
+    0000058C <00000000>             .DATA.L     _PLLs
+    00000590 <00000000>             .DATA.L     _change_freq
+    00000594 <00000000>             .DATA.L     _change_iclk
+    00000598 3F000000               .DATA.L     H'3F000000
+    0000059C 00F00000               .DATA.L     H'00F00000
+    000005A0 <00000000>             .DATA.L     _FRQCR
+    000005A4 <00000000>             .DATA.L     _key
+    000005A8              L490:                            ; case label 
+    000005A8 6EF2                   MOV.L       @R15,R14
+    000005AA 54F4                   MOV.L       @(16,R15),R4
+         Speed.c   312                            case KEY_CTRL_RIGHT:
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   20
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+         Speed.c   313                                    for(i = 1; i < 3; i++) {
+    000005AC 51F3                   MOV.L       @(12,R15),R1
+    000005AE 3412                   CMP/HS      R1,R4
+    000005B0 8912                   BT          L503
+    000005B2              L517:                             
+         Speed.c   314                                            if(((*FRQCR & 0x00F00000) >> 20) == DIVs[i]) {
+    000005B2 6352                   MOV.L       @R5,R3
+    000005B4 23D9                   AND         R13,R3
+    000005B6 4329                   SHLR16      R3
+    000005B8 6142                   MOV.L       @R4,R1
+    000005BA 4309                   SHLR2       R3
+    000005BC 4309                   SHLR2       R3
+    000005BE 3310                   CMP/EQ      R1,R3
+    000005C0 8B05                   BF          L518
+         Speed.c   315                                                    change_iclk(DIVs[i-1]);
+    000005C2 4B0B                   JSR         @R11
+    000005C4 64E2                   MOV.L       @R14,R4
+         Speed.c   316                                                    update();
+         Speed.c   317                                                    break;
+    000005C6              L559:                             
+    000005C6 BD2B                   BSR         _update
+    000005C8 0009                   NOP
+    000005CA A005                   BRA         L503
+    000005CC 0009                   NOP
+    000005CE              L518:                             
+    000005CE 7404                   ADD         #4,R4
+    000005D0 52F3                   MOV.L       @(12,R15),R2
+    000005D2 3422                   CMP/HS      R2,R4
+    000005D4 8FED                   BF/S        L517
+    000005D6 7E04                   ADD         #4,R14
+    000005D8              L503:                             
+         Speed.c   318                                            }
+         Speed.c   319                                    }
+         Speed.c   320                                    break;
+         Speed.c   321                            default:
+         Speed.c   322                                    break;
+         Speed.c   323                    }
+         Speed.c   324                    GetKey(&key);
+    000005D8 D403                   MOV.L       L577,R4    ; _key
+    000005DA D304                   MOV.L       L577+4,R3  ; _GetKey
+    000005DC 430B                   JSR         @R3
+    000005DE 0009                   NOP
+         Speed.c   325                    update();
+    000005E0 BD1E                   BSR         _update
+    000005E2 0009                   NOP
+    000005E4 AF77                   BRA         L502
+    000005E6 0009                   NOP
+    000005E8              L577:                             
+    000005E8 <00000000>             .DATA.L     _key
+    000005EC <00000000>             .DATA.L     _GetKey
+         Speed.c   326            }
+         Speed.c   327     
+         Speed.c   328            return 0;
+         Speed.c   329    }
+         Speed.c   330    
+         Speed.c   331    //****************************************************************************
+         Speed.c   332    //**************                                              ****************
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   21
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+         Speed.c   333    //**************                 Notice!                      ****************
+         Speed.c   334    //**************                                              ****************
+         Speed.c   335    //**************  Please do not change the following source.  ****************
+         Speed.c   336    //**************                                              ****************
+         Speed.c   337    //****************************************************************************
+         Speed.c   338    
+         Speed.c   339    
+         Speed.c   340    #pragma section _BR_Size
+         Speed.c   341    unsigned long BR_Size;
+         Speed.c   342    #pragma section
+         Speed.c   343    
+         Speed.c   344    
+         Speed.c   345    #pragma section _TOP
+         Speed.c   346    
+         Speed.c   347    //****************************************************************************
+         Speed.c   348    //  InitializeSystem
+         Speed.c   349    //
+         Speed.c   350    //  param   :   isAppli   : 1 = Application / 0 = eActivity
+         Speed.c   351    //              OptionNum : Option Number (only eActivity)
+         Speed.c   352    //
+         Speed.c   353    //  retval  :   1 = No error / 0 = Error
+         Speed.c   354    //
+         Speed.c   355    //****************************************************************************
+         Speed.c   356    int InitializeSystem(int isAppli, unsigned short OptionNum)
+P_T 00000000              _InitializeSystem:               ; function: InitializeSystem
+                                                           ; frame size=0
+         Speed.c   357    {
+         Speed.c   358        return INIT_ADDIN_APPLICATION(isAppli, OptionNum);
+    00000000 D301                   MOV.L       L578+2,R3  ; _INIT_ADDIN_APPLICATION
+    00000002 432B                   JMP         @R3
+    00000004 0009                   NOP
+    00000006              L578:                             
+    00000006 0000                   .DATA.W     0
+    00000008 <00000000>             .DATA.L     _INIT_ADDIN_APPLICATION
+         Speed.c   359    }
+         Speed.c   360    
+         Speed.c   361    #pragma section
+         Speed.c   362    
+C   00000000              _PLLs:                           ; static: PLLs
+    00000000 0000000000             .DATA.L     H'00000000,H'00000001,H'00000002,H'00000003,H'00000005,H'00000007,H'0000000B,
+             0000010000 +                       H'0000000E,H'0000000F,H'00000011,H'00000013,H'00000017,H'00000019,H'0000001B
+             0002000000   
+             0300000005   
+             0000000700   
+             00000B0000   
+             000E000000   
+             0F00000011   
+             0000001300   
+             0000170000   
+             0019000000   
+             1B           
+    00000038              _DIVs:                           ; static: DIVs
+    00000038 0000000000             .DATA.L     H'00000000,H'00000001,H'00000002,H'00000003,H'00000004,H'00000005,H'00000006,
+             0000010000 +                       H'00000007,H'00000008,H'00000009,H'0000000A,H'0000000B
+             0002000000   
+             0300000004   
+             0000000500   
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   22
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+             0000060000   
+             0007000000   
+             0800000009   
+             0000000A00   
+             00000B       
+    00000068              L311:
+    00000068 20204F7065             .SDATA      "  Operating Frequency"
+             726174696E   
+             6720467265   
+             7175656E63   
+             79           
+    0000007D 00                     .DATA.B     H'00
+    0000007E 00000002               .RES.W      1
+    00000080              L312:
+    00000080 2020467265             .SDATA      "  Freq:"
+             713A         
+    00000087 00                     .DATA.B     H'00
+    00000088              L313:
+    00000088 202049434C             .SDATA      "  ICLK:"
+             4B3A         
+    0000008F 00                     .DATA.B     H'00
+    00000090              L314:
+    00000090 202050434C             .SDATA      "  PCLK:"
+             4B3A         
+    00000097 00                     .DATA.B     H'00
+    00000098              L315:
+    00000098 202042434C             .SDATA      "  BCLK:"
+             4B3A         
+    0000009F 00                     .DATA.B     H'00
+    000000A0              L316:
+    000000A0 202053434C             .SDATA      "  SCLK:"
+             4B3A         
+    000000A7 00                     .DATA.B     H'00
+    000000A8              L317:
+    000000A8 2020552F44             .SDATA      "  U/D - FRQ, L/R - ICLK"
+             202D204652   
+             512C204C2F   
+             52202D2049   
+             434C4B       
+    000000BF 00                     .DATA.B     H'00
+    000000C0              L319:
+    000000C0 2020313031             .SDATA      "  101.5 MHz !!!"
+             2E35204D48   
+             7A20212121   
+    000000CF 00                     .DATA.B     H'00
+    000000D0              L320:
+    000000D0 202039342E             .SDATA      "  94.3 MHz"
+             33204D487A   
+    000000DA 00                     .DATA.B     H'00
+    000000DB 00000001               .RES.B      1
+    000000DC              L321:
+    000000DC 2020383720             .SDATA      "  87 MHz"
+             4D487A       
+    000000E4 00                     .DATA.B     H'00
+    000000E5 00000001               .RES.B      1
+    000000E6 00000002               .RES.W      1
+    000000E8              L322:
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   23
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    000000E8 202037322E             .SDATA      "  72.5 MHz"
+             35204D487A   
+    000000F2 00                     .DATA.B     H'00
+    000000F3 00000001               .RES.B      1
+    000000F4              L323:
+    000000F4 202036352E             .SDATA      "  65.3 MHz"
+             33204D487A   
+    000000FE 00                     .DATA.B     H'00
+    000000FF 00000001               .RES.B      1
+    00000100              L324:
+    00000100 2020353820             .SDATA      "  58 MHz (NORM)"
+             4D487A2028   
+             4E4F524D29   
+    0000010F 00                     .DATA.B     H'00
+    00000110              L325:
+    00000110 202035342E             .SDATA      "  54.4 MHz"
+             34204D487A   
+    0000011A 00                     .DATA.B     H'00
+    0000011B 00000001               .RES.B      1
+    0000011C              L326:
+    0000011C 202034332E             .SDATA      "  43.5 MHz"
+             35204D487A   
+    00000126 00                     .DATA.B     H'00
+    00000127 00000001               .RES.B      1
+    00000128              L327:
+    00000128 2020323920             .SDATA      "  29 MHz"
+             4D487A       
+    00000130 00                     .DATA.B     H'00
+    00000131 00000001               .RES.B      1
+    00000132 00000002               .RES.W      1
+    00000134              L328:
+    00000134 202032312E             .SDATA      "  21.7 MHz"
+             37204D487A   
+    0000013E 00                     .DATA.B     H'00
+    0000013F 00000001               .RES.B      1
+    00000140              L329:
+    00000140 202031342E             .SDATA      "  14.5 MHz"
+             35204D487A   
+    0000014A 00                     .DATA.B     H'00
+    0000014B 00000001               .RES.B      1
+    0000014C              L330:
+    0000014C 202031302E             .SDATA      "  10.8 MHz"
+             38204D487A   
+    00000156 00                     .DATA.B     H'00
+    00000157 00000001               .RES.B      1
+    00000158              L331:
+    00000158 2020372E32             .SDATA      "  7.25 MHz"
+             35204D487A   
+    00000162 00                     .DATA.B     H'00
+    00000163 00000001               .RES.B      1
+    00000164              L332:
+    00000164 2020332E36             .SDATA      "  3.6 MHz"
+             204D487A     
+    0000016D 00                     .DATA.B     H'00
+    0000016E 00000002               .RES.W      1
+    00000170              L333:
+    00000170 2020494E56             .SDATA      "  INVALID"
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   24
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+             414C4944     
+    00000179 00                     .DATA.B     H'00
+    0000017A 00000002               .RES.W      1
+    0000017C              L335:
+    0000017C 2020312F37             .SDATA      "  1/72"
+             32           
+    00000182 00                     .DATA.B     H'00
+    00000183 00000001               .RES.B      1
+    00000184              L336:
+    00000184 2020312F34             .SDATA      "  1/48"
+             38           
+    0000018A 00                     .DATA.B     H'00
+    0000018B 00000001               .RES.B      1
+    0000018C              L337:
+    0000018C 2020312F33             .SDATA      "  1/36"
+             36           
+    00000192 00                     .DATA.B     H'00
+    00000193 00000001               .RES.B      1
+    00000194              L338:
+    00000194 2020312F33             .SDATA      "  1/32"
+             32           
+    0000019A 00                     .DATA.B     H'00
+    0000019B 00000001               .RES.B      1
+    0000019C              L339:
+    0000019C 2020312F32             .SDATA      "  1/24"
+             34           
+    000001A2 00                     .DATA.B     H'00
+    000001A3 00000001               .RES.B      1
+    000001A4              L340:
+    000001A4 2020312F31             .SDATA      "  1/16"
+             36           
+    000001AA 00                     .DATA.B     H'00
+    000001AB 00000001               .RES.B      1
+    000001AC              L341:
+    000001AC 2020312F31             .SDATA      "  1/12"
+             32           
+    000001B2 00                     .DATA.B     H'00
+    000001B3 00000001               .RES.B      1
+    000001B4              L342:
+    000001B4 2020312F38             .SDATA      "  1/8"
+    000001B9 00                     .DATA.B     H'00
+    000001BA 00000002               .RES.W      1
+    000001BC              L343:
+    000001BC 2020312F36             .SDATA      "  1/6"
+    000001C1 00                     .DATA.B     H'00
+    000001C2 00000002               .RES.W      1
+    000001C4              L344:
+    000001C4 2020312F34             .SDATA      "  1/4"
+    000001C9 00                     .DATA.B     H'00
+    000001CA 00000002               .RES.W      1
+    000001CC              L345:
+    000001CC 2020312F33             .SDATA      "  1/3 (NORM)"
+             20284E4F52   
+             4D29         
+    000001D8 00                     .DATA.B     H'00
+    000001D9 00000001               .RES.B      1
+    000001DA 00000002               .RES.W      1
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE   25
+
+
+SCT OFFSET   CODE       C LABEL     INSTRUCTION OPERAND    COMMENT
+
+    000001DC              L346:
+    000001DC 2020312F32             .SDATA      "  1/2 !!!"
+             20212121     
+    000001E5 00                     .DATA.B     H'00
+    000001E6 00000002               .RES.W      1
+    000001E8              L348:
+    000001E8 2020312F36             .SDATA      "  1/6 (NORM)"
+             20284E4F52   
+             4D29         
+    000001F4 00                     .DATA.B     H'00
+    000001F5 00000001               .RES.B      1
+    000001F6 00000002               .RES.W      1
+    000001F8              L349:
+    000001F8 2020312F33             .SDATA      "  1/3"
+    000001FD 00                     .DATA.B     H'00
+    000001FE 00000002               .RES.W      1
+    00000200              L350:
+    00000200 2020312F32             .SDATA      "  1/2"
+    00000205 00                     .DATA.B     H'00
+    00000206 00000002               .RES.W      1
+    00000208              L352:
+    00000208 2020312F34             .SDATA      "  1/4 (NORM)"
+             20284E4F52   
+             4D29         
+    00000214 00                     .DATA.B     H'00
+    00000215 00000001               .RES.B      1
+    00000216 00000002               .RES.W      1
+    00000218              L355:
+    00000218 2020554E53             .SDATA      "  UNSAFE FREQ/DIV VALUE"
+             4146452046   
+             5245512F44   
+             4956205641   
+             4C5545       
+    0000022F 00                     .DATA.B     H'00
+    00000230              L357:
+    00000230 202054524F             .SDATA      "  TROUBLESOME DIV VALUE"
+             55424C4553   
+             4F4D452044   
+             4956205641   
+             4C5545       
+    00000247 00                     .DATA.B     H'00
+D   00000000              _key:                            ; static: key
+    00000000 00000000               .DATA.L     H'00000000
+    00000004              _cur:                            ; static: cur
+    00000004 00000000               .DATA.L     H'00000000
+    00000008              _FRQCR:                          ; static: FRQCR
+    00000008 A4150000               .DATA.L     H'A4150000
+B_B 00000000              _BR_Size:                        ; static: BR_Size
+    00000000 00000004               .RES.L      1
+
+
+
+
+
+
+
+
+
+
+
+
+SH SERIES C/C++ Compiler (Ver. 6.0C)                                                                 18-Oct-2012 16:26:34  PAGE    1
+
+
+******** STATISTICS INFORMATION ********
+
+
+********** ERROR INFORMATION ***********
+
+NUMBER OF ERRORS:           0
+NUMBER OF WARNINGS:         2
+
+
+
+
+******* SOURCE LINE INFORMATION ********
+
+COMPILED SOURCE LINE:      362
+
+
+
+******* SECTION SIZE INFORMATION *******
+
+PROGRAM  SECTION (P):                               000005F0 Byte(s)
+PROGRAM  SECTION (P_BR_Size):                       00000000 Byte(s)
+PROGRAM  SECTION (P_TOP):                           0000000C Byte(s)
+CONSTANT SECTION (C):                               00000248 Byte(s)
+CONSTANT SECTION (C_BR_Size):                       00000000 Byte(s)
+CONSTANT SECTION (C_TOP):                           00000000 Byte(s)
+DATA     SECTION (D):                               0000000C Byte(s)
+DATA     SECTION (D_BR_Size):                       00000000 Byte(s)
+DATA     SECTION (D_TOP):                           00000000 Byte(s)
+BSS      SECTION (B):                               00000000 Byte(s)
+BSS      SECTION (B_BR_Size):                       00000004 Byte(s)
+BSS      SECTION (B_TOP):                           00000000 Byte(s)
+
+ TOTAL PROGRAM SIZE: 00000854 Byte(s)
+
+
+
+********** LABEL INFORMATION ***********
+
+NUMBER OF EXTERNAL REFERENCE SYMBOLS:            7
+NUMBER OF EXTERNAL DEFINITION SYMBOLS:          10
+NUMBER OF INTERNAL/EXTERNAL SYMBOLS:           176
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*** COMMAND PARAMETER ***
+
+
+  -subcommand=C:\Users\Timo\AppData\Local\Temp\hmkFC48.tmp 
+
